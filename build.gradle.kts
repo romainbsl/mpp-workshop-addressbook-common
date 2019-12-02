@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.mybusiness"
-version = "1.0.0"
+version = "2.0.0"
 
 repositories {
     jcenter()
@@ -14,7 +14,13 @@ repositories {
 }
 
 kotlin {
-    jvm("android")
+    jvm("android") {
+        val main by compilations.getting {
+            kotlinOptions {
+                jvmTarget = "1.8"
+            }
+        }
+    }
 
     iosX64("ios") {
         binaries {
@@ -52,6 +58,8 @@ kotlin {
                 implementation(ktorClient("core"))
                 implementation(ktorClient("json"))
                 implementation(ktorClient("serialization"))
+                // Kodein-DI
+                implementation("org.kodein.di:kodein-di-erased:6.5.0")
             }
         }
         val androidMain by getting {

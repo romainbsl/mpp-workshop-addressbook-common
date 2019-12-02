@@ -6,6 +6,9 @@ import com.mybusiness.api.ContactApi
 import com.mybusiness.model.Contact
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.kodein.di.Kodein
+import org.kodein.di.KodeinAware
+import org.kodein.di.erased.instance
 import kotlin.coroutines.CoroutineContext
 import kotlin.js.JsName
 
@@ -22,9 +25,12 @@ class ContactCreationUpdate {
     }
 }
 class ContactCreationUpdatePresenter(
-        private val contactApi: ContactApi,
+        override val kodein: Kodein,
         coroutineContext: CoroutineContext = ApplicationDispatcher
-) : ContactCreationUpdate.Presenter, BasePresenter<ContactCreationUpdate.View>(coroutineContext) {
+) : ContactCreationUpdate.Presenter, BasePresenter<ContactCreationUpdate.View>(coroutineContext), KodeinAware {
+
+    private val contactApi: ContactApi by instance()
+
     override fun updateOrCreateContact(contact: Contact) {
         scope.launch {
             try {
