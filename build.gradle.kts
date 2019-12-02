@@ -13,6 +13,9 @@ repositories {
     maven(url = "https://dl.bintray.com/jetbrains/kotlin-native-dependencies")
 }
 
+val iosDevHack: String? by project
+val iosDevHackEnabled = iosDevHack == "true"
+
 kotlin {
     jvm("android") {
         val main by compilations.getting {
@@ -22,7 +25,10 @@ kotlin {
         }
     }
 
-    iosX64("ios") {
+    val iosTargets =
+            if (iosDevHackEnabled) listOf(iosX64("ios"))
+            else listOf(iosX64(), iosArm64(), iosArm32())
+    configure(iosTargets) {
         binaries {
             framework {
                 baseName = "AddressBookCommon"
@@ -64,6 +70,13 @@ kotlin {
                 implementation ("com.soywiz.korlibs.klock:klock:1.7.5")
             }
         }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+            }
+        }
+
         val androidMain by getting {
             dependencies {
                 // Kotlin
@@ -79,6 +92,12 @@ kotlin {
             }
         }
 
+        if (!iosDevHackEnabled) {
+            create("iosMain").apply {
+                dependsOn(commonMain)
+            }
+        }
+
         val iosMain by getting {
             dependencies {
                 // Kotlinx
@@ -89,6 +108,26 @@ kotlin {
                 implementation(ktorClient("json-native"))
                 implementation(ktorClient("serialization-native"))
                 implementation(ktorClient("ios"))
+            }
+        }
+
+        if (!iosDevHackEnabled) {
+            create("iosTest").apply {
+                dependsOn(commonTest)
+                dependsOn(iosMain)
+            }
+        }
+
+        val iosTest by getting {}
+
+        if (!iosDevHackEnabled) {
+            listOf("iosX64", "iosArm64", "iosArm32").forEach {
+                getByName("${it}Main") {
+                    dependsOn(iosMain)
+                }
+                getByName("${it}Test") {
+                    dependsOn(iosTest)
+                }
             }
         }
 
@@ -112,7 +151,7 @@ kotlin {
 val packForXcode by tasks.creating(Sync::class) {
     val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
     val framework = kotlin.targets
-            .getByName<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget>("ios")
+            .getByName<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget>("iosX64")
             .binaries.getFramework(mode)
     inputs.property("mode", mode)
 
