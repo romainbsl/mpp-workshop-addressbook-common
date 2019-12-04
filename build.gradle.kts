@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.mybusiness"
-version = "2.0.0"
+version = "3.0.0"
 
 repositories {
     jcenter()
@@ -60,6 +60,8 @@ kotlin {
                 implementation(ktorClient("serialization"))
                 // Kodein-DI
                 implementation("org.kodein.di:kodein-di-erased:6.5.0")
+                // Klock
+                implementation ("com.soywiz.korlibs.klock:klock:1.8.0")
             }
         }
         val androidMain by getting {

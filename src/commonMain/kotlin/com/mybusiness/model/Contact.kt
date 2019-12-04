@@ -1,6 +1,8 @@
 package com.mybusiness.model
 
+import com.soywiz.klock.DateTime
 import kotlinx.serialization.Serializable
+import kotlin.random.Random
 
 @Serializable
 data class Contact(
@@ -11,6 +13,13 @@ data class Contact(
 ) {
     val fullName: String
         get() = "${name.lastName} ${name.firstName}"
+
+    val birthday: DateTime
+        get() = DateTime(
+                year = Random.nextInt(1950, 2019),
+                month = Random.nextInt(1, 12),
+                day = Random.nextInt(1, 28)
+        )
 }
 
 @Serializable
